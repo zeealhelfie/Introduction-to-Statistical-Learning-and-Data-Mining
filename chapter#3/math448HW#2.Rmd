@@ -1,0 +1,197 @@
+---
+title: "Chapter 3 HW"
+author: "Zahraa Alshalal"
+date: "03/09/2023"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+```     
+
+## libraries:    
+
+```{r}
+# packages
+library(ISLR)
+tinytex::install_tinytex()
+```     
+
+* * *     
+
+## Conceptual Questions        
+
+
+#### Exercise 1:              
+
++ $H_0=\beta_0=\beta_1=\beta_2$ : advertising budgets of “TV”, “radio” or “newspaper” do not have an effect on sales.     
++ $H_a = \text{at least one }  \beta_i \ne 0$.       
++ The corresponding p-values are highly significant for “TV” and “radio” and not significant for “newspaper”. We may conclude that newspaper advertising budget do not affect sales.    
+
+#### Exercise 3:        
++ $X_1 =\text{GPA },X_2=\text{IQ },X_3=\text{Level[0,1]},X_4=\text{GPA and IQ },X_5=\text{GPA and level.}$
++ $\hat{y}=50+20X_1+0.07X_2+35X_3+0.01X_4-10X_5$
+
+#### a)     
++ Salary (high school): $\hat{y_H} = 50 + 20X_1 + 0.07X_2 + 0.01X_1X_2$    
++ Salary (college): $\hat{y_C} = 85 + 10X_1 + 0.07X_2 + 0.01X_1X_2$    
++ when GPA is higher than 3.5 high school graduates earn more. iii. For a fixed value of IQ and GPA, high school graduates earn more, on average, than college graduates provided that the GPA is high enough.     
+
+
+#### b) 
++ Salary: $\hat{y}= 50 + (20*4) + (0.07*110) + 35 + (0.01*110) - (10*4) = 137.1 \text{ in thousands of dollars}.$   
+
+#### c)  
++ False: the magnitude of coefficient is not an indicator of statistical significance. We must examine the p-value of the regression coefficient to determine if the interaction term is statistically significant.   
+
+* * *    
+
+## Applied Questions:        
+
+#### Exercise 10:          
+#### a)             
+
+```{r}
+summary(Carseats)
+```      
+```{r}
+attach(Carseats)
+lm.fit = lm(Sales~Price+Urban+US)
+summary(lm.fit)
+```    
+
+#### b)
++ Price: The coefficient states a negative relationship between Price and Sales: as Price increases, Sales decreases.       
++ Urban: There isn’t a relationship between the location of the store and the number of sales based on the high p-value of the t-statistic.        
++ US: There is a relationship between whether the store is in the US or not and the amount of sales. The coefficient states a positive relationship between US and Sales. On average the unit sales in a US store are 1200.5726978 units more than in a non US store all other predictors remaining fixed.     
+
+#### c)      
++ $\text{Sales}=13.0434689+(−0.0544588)*\text{Price}+(−0.0219162)*\text{Urban}+(1.2005727)*US+\epsilon$     
+
+
+#### d)  
++ We can reject the null hypothesis for the “Price” and “US” variables.    
+
+#### e)
+```{r}
+lm.fit2 = lm(Sales ~ Price + US)
+summary(lm.fit2)
+```      
+
+#### f) 
++ Based on the RSE and R^2 of the linear regressions, they both fit the data similarly, with linear regression from (e) fitting the data slightly better. about 23.9262888% of the variability is explained by the second model.          
+
+#### g)
+```{r}
+confint(lm.fit2)
+```     
+#### h)
+```{r}
+plot(predict(lm.fit2), rstudent(lm.fit2))
+par(mfrow=c(2,2))
+plot(lm.fit2)
+```      
+
++ All studentized residuals appear to be bounded by (-3 to 3), so not potential outliers are suggested from the linear regression.      
++ There are a few observations that greatly exceed (p+1)/n on the leverage-statistic plot that suggest that the corresponding points have high leverage.    
+
+#### Exercise 13:      
+#### a)        
+```{r}
+set.seed(1)
+x = rnorm(100)
+```     
+#### b)     
+```{r}
+eps = rnorm(100, 0, sqrt(0.25))
+```     
+#### c)     
+```{r}
+y = -1 + 0.5*x + eps
+```      
++ $y=100,\beta_0=-1,\beta_1=0.5.$       
+
+#### d)     
+```{r}
+plot(x, y)
+```      
+
++ A linear relationship between x and y with a positive slope, with a variance as is to be expected.    
+
+
+#### e)    
+```{r}
+lm.fit = lm(y~x)
+summary(lm.fit)
+```    
++ The linear regression fits a model close to the true value of the coefficients as was constructed. The model has a large F-statistic with a near-zero p-value so the null hypothesis can be rejected.    
++ $\hat{\beta_0} = -1.0145, \hat{\beta_1} = 0.5130.$ similar to β0 and β1.     
+
+#### f)     
+
+```{r}
+plot(x, y)
+abline(lm.fit, lwd=3, col=2)
+abline(-1, 0.5, lwd=3, col=3)
+legend(-1, legend = c("model fit", "pop. regression"), col=2:3, lwd=3)
+
+```     
+
+#### g)       
+```{r}
+lm.fit_sq = lm(y~x+I(x^2))
+summary(lm.fit_sq)
+```    
++ There is evidence that model fit has increased over the training data given the slight increase in R^2 and RSE.    
+
+#### h)    
+
+```{r}
+set.seed(1)
+eps1 = rnorm(100, 0, 0.125)
+x1 = rnorm(100)
+y1 = -1 + 0.5*x1 + eps1
+plot(x1, y1)
+lm.fit1 = lm(y1~x1)
+summary(lm.fit1)
+abline(lm.fit1, lwd=3, col=2)
+abline(-1, 0.5, lwd=3, col=3)
+legend(-1, legend = c("model fit", "pop. regression"), col=2:3, lwd=3)
+```   
+    
++ As expected, the error observed in the values of R^2 decreases considerably.    
+
+#### i)    
+```{r}
+set.seed(1)
+eps2 = rnorm(100, 0, 0.5)
+x2 = rnorm(100)
+y2 = -1 + 0.5*x2 + eps2
+plot(x2, y2)
+lm.fit2 = lm(y2~x2)
+summary(lm.fit2)
+abline(lm.fit2, lwd=3, col=2)
+abline(-1, 0.5, lwd=3, col=3)
+legend(-1, legend = c("model fit", "pop. regression"), col=2:3, lwd=3)
+```
+    
++ As expected, the error observed in R^2 and increases considerably.    
+
+#### j)    
+
+```{r}
+confint(lm.fit)
+confint(lm.fit1)
+confint(lm.fit2)
+```      
++ All intervals seem to be centered on approximately 0.5, with the second fit’s interval being narrower than the first fit’s interval and the last fit’s interval being wider than the first fit’s interval.    
+
+
+

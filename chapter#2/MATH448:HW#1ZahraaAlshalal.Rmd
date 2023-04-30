@@ -1,0 +1,193 @@
+---
+title: "Chapter 2 HW"
+author: "Zahraa Alshalal"
+date: "2/16/2023"
+output:
+  word_document: default
+  pdf_document: default
+  html_document:
+    fig_height: 4
+    highlight: pygments
+    theme: spacelab
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+* * *
+
+## Conceptual Questions   
+### Exercise 2:    
+#### a). regression. inference. quantitative output of CEO salary based on CEO firm's features.   
+#### n - 500 firms in the US   
+#### p - profit, number of employees, industry   
+#### (b) classification. prediction. predicting new product's success or failure.   
+#### n - 20 similar products previously launched   
+#### p - price charged, marketing budget, comp. price, ten other variables    
+#### (c) regression. prediction. quantitative output of % change   
+#### n - 52 weeks of 2012 weekly data   
+#### p - % change in US market, % change in British market, % change in German market   
+    
+    
+### Exercise 4:    
+### a)   
+### application #1: disease X has four variances (A, B, C, D), and 10 symptoms.   
+#### Response: A, B, C, D: the four types of the disease.    
+#### predictors: The 10 symptoms.   
+#### The goal of each application prediction.    
+### application #2: The home mortgage can have two conditions: default and non-default.   
+#### Response: default/non-default   
+#### Predictors: income, education, banking balance and previous credits.   
+#### The goal of each application prediction.    
+### application #3: stock market price direction   
+#### Response:  up, down.  
+#### predictors: yesterday's price movement % change, two previous day price movement % change, etc.   
+#### The goal of each application prediction.  
+### b)   
+### application #1: CEO salary.     
+#### Response: salary.      
+#### predictors:  age, industry experience, industry, years of education.      
+#### The goal of each application inference.
+### application #2: The next day temperature.   
+#### Response: the next-day temperature.   
+#### Predictors: set of current daily weather factors: 5 factors.   
+#### The goal of each application prediction.    
+### application #3: The height of the children.    
+#### Response: the height of the children.     
+#### predictors: mother’s height, father’s height, daily diet and daily exercise.      
+#### The goal of each application inference  
+### b) 
+### application #1: social class: low-income, middle class and high-income class.   
+### application #2: Netflix movie recommendations. recommend movies based on users who have watched and rated similar movies.   
+### application #3: marketing survey. clustering of demographics for a product(s) to see which clusters of consumers buy which products.    
+
+* * *
+
+## Applied Questions
+
+### Exercise 8: 
+
+
+```{r}
+
+# 8. (a)
+college = read.csv("~/Desktop/spring23/math448/hw/HW#1/College.csv")
+# 8. (b)
+rownames(college) = college[, 1]
+college = college[,-1] 
+head(college)
+# 8. (c)
+# i.
+summary(college)
+# ii.
+college$Private = as.factor(college$Private)
+pairs(college[, 1:10])
+# iii.
+plot(college$Private, college$Outstate)
+# iv.
+Elite = rep("No", nrow(college))
+Elite[college$Top10perc>50] = "Yes"
+Elite = as.factor(Elite)
+college = data.frame(college, Elite)
+summary(college$Elite)
+plot(college$Elite, college$Outstate)
+# v.
+par(mfrow=c(2,2))
+hist(college$Personal)
+hist(college$Grad.Rate, col=2)
+hist(college$PhD, col=3, breaks=10)
+hist(college$Accept, breaks=100)
+# vi.
+par(mfrow=c(1,1))
+plot(college$Apps, college$Accept)
+plot(college$Outstate / college$Enroll, college$Grad.Rate)
+plot(college$F.Undergrad, college$Room.Board)
+```   
+
+### summary:   
+#### The relationship between the Number of applications received and the Number of applicants accepted seem to be linear.   
+#### High tuition correlates to high graduation rate.      
+
+### Exercise 10:        
+```{r}
+# 10.
+# (a)
+library(MASS)
+head(Boston)
+dim(Boston)
+```    
+#### 506 rows, 14 columns: 506 housing values in Boston suburbs with 14 features each.  
+```{r}   
+# (b)
+str(Boston)
+Boston$chas = as.numeric(Boston$chas)
+Boston$rad = as.numeric(Boston$rad)
+pairs(Boston[, 1:14])
+```   
+##### X correlates with: a, b, c.    
+
+```{r}
+# (c)
+summary(Boston$crim) 
+summary(Boston$tax)
+summary(Boston$ptratio)
+
+plot(crim ~ age, data = Boston, log = "xy") # Older homes, more crime
+
+plot(crim ~ dis, data = Boston) # Closer to work-area, more crime
+
+plot(crim ~ rad, data = Boston, log = "xy") # Higher index of accessibility to radial highways, more crime
+# as box plots, since rad appears to be categorical
+plot(crim ~ as.factor(rad),
+     log = "y",
+     data = Boston,
+     xlab = "Accessibility to radial highways",
+     ylab = "log of crime")
+
+plot(crim ~ tax, log = "xy", data = Boston) # Higher tax rate, more crime
+
+plot(crim ~ ptratio, log = "xy", data = Boston) # Higher pupil:teacher ratio, more crime
+
+#correlations
+cor(Boston)
+```   
+
+```{r}
+# (d)
+par(mfrow=c(1,3))
+hist(Boston$crim[Boston$crim>1], breaks=25)
+hist(Boston$tax, breaks=25)
+hist(Boston$ptratio, breaks=25)
+```      
+
+#### most cities have low crime rates, but there is a long tail: 18 suburbs appear to have a crime rate > 20, reaching to above 80.       
+#### There is a large divide between suburbs with low tax rates and a peak at 660-680.       
+#### A skew towards high ratios, but no particularly high ratios.    
+
+```{r}
+# (e)
+dim(subset(Boston, chas == 1))
+
+
+# (f)
+median(Boston$ptratio)
+
+# (g)
+selection = Boston[order(Boston$medv),]
+selection[1,]
+
+
+# (h)
+dim(subset(Boston, rm > 7))
+
+dim(subset(Boston, rm > 8))
+
+summary(subset(Boston, rm > 8))
+summary(Boston)
+
+```    
+#### There are 64 homes with 7 rooms, and there are 13 homes with 8 room. THe rates of crimes increase at neighborhoods with fewer rooms. 
+
+
+

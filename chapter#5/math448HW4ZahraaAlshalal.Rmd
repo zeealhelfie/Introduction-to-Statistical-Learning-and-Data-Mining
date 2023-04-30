@@ -1,0 +1,285 @@
+---
+title: 'Math448: Chapter 5 HW'
+author: "Zahraa Alshalal"
+date: "2023-04-18"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Conceptual Questions:
+
+> Exercise 3:
+
+-   
+
+    a)  
+
+    -   K-fold cross-validation is used to evaluate the performance of a model on a given data-set.
+
+    -   It works by randomly splitting the data-set into k equal-sized subsets or folds.\
+
+    -   Then the algorithm iterates through k rounds of training and evaluation. In each round, one fold is held out as a validation set, while the remaining k-1 folds are used for training the model.\
+
+    -   The validation set is used evaluate the model.\
+
+    -   The test error is estimated by averaging the k resulting MSE estimates.
+
+-   
+
+    b)  
+
+        i.  Advantages compared to The validation set approach:
+
+    -   k-fold cross-validation provides a more accurate estimate of the model's performance because it uses all available data for training and testing.\
+
+    -   k-fold cross-validation reduces the risk of over-fitting because it trains and evaluates the model on multiple subsets of the data rather than just one.\
+
+        Disadvantages compared to The validation set approach:\
+
+    -   k-fold cross-validation is computationally more expensive.\
+
+    -   k-fold cross-validation may not be suitable for small data-sets when the data-set has high variance,
+
+        ii. Advantages compared to LOOCV:
+
+    -   k-fold cross-validation is less computationally expensive.
+
+    -   k-fold cross-validation can provide a more accurate estimate of the model's performance.
+
+        Disadvantages compared to LOOCV:\
+
+    -   LOOCV can provide a more accurate estimate of the model's performance than k-fold cross-validation when the data-set has a small sample size.\
+
+    -   LOOCV can be less biased when the data-set has a small sample size.
+
+## Applied Questions:
+
+### Exercise 5:
+
+```{r}
+library(ISLR)
+summary(Default)
+```
+
+```{r}
+attach(Default)
+```
+
+#### a.
+
+```{r}
+set.seed(1)
+fit.glm = glm(default ~ income + balance, data = Default, family = "binomial")
+summary(fit.glm)
+```
+
+#### b.
+
+```{r}
+#  i.
+trainset = sample(dim(Default)[1], dim(Default)[1] / 2)
+
+# ii. 
+fit.trainset = glm(default ~ income + balance, data = Default, family = "binomial", subset = trainset)
+
+# iii. 
+glm.pred = rep("No", dim(Default)[1]/2)
+
+glm.probs = predict(fit.trainset, Default[-trainset, ], type = "response")
+
+glm.pred[glm.probs > 0.5] = "Yes"
+
+# iv. 
+et = mean(glm.pred != Default[-trainset, "default"])
+cat("The test error rate:", et*100, "% from validation set approach")
+```
+
+#### c.
+
+```{r}
+# 1
+#  i.
+trainset = sample(dim(Default)[1], dim(Default)[1] / 2)
+
+# ii. 
+fit.trainset = glm(default ~ income + balance, data = Default, family = "binomial", subset = trainset)
+
+# iii. 
+glm.pred = rep("No", dim(Default)[1]/2)
+
+glm.probs = predict(fit.trainset, Default[-trainset, ], type = "response")
+
+glm.pred[glm.probs > 0.5] = "Yes"
+
+# iv. 
+et = mean(glm.pred != Default[-trainset, "default"])
+cat("The test error rate:", et*100, "% from validation set approach")
+```
+
+```{r}
+# 2
+#  i.
+trainset = sample(dim(Default)[1], dim(Default)[1] / 2)
+
+# ii. 
+fit.trainset = glm(default ~ income + balance, data = Default, family = "binomial", subset = trainset)
+
+# iii. 
+glm.pred = rep("No", dim(Default)[1]/2)
+
+glm.probs = predict(fit.trainset, Default[-trainset, ], type = "response")
+
+glm.pred[glm.probs > 0.5] = "Yes"
+
+# iv. 
+et = mean(glm.pred != Default[-trainset, "default"])
+cat("The test error rate:", et*100, "% from validation set approach")
+```
+
+```{r}
+# 3
+#  i.
+trainset = sample(dim(Default)[1], dim(Default)[1] / 2)
+
+# ii. 
+fit.trainset = glm(default ~ income + balance, data = Default, family = "binomial", subset = trainset)
+
+# iii. 
+glm.pred = rep("No", dim(Default)[1]/2)
+
+glm.probs = predict(fit.trainset, Default[-trainset, ], type = "response")
+
+glm.pred[glm.probs > 0.5] = "Yes"
+
+# iv. 
+et = mean(glm.pred != Default[-trainset, "default"])
+cat("The test error rate:", et*100, "% from validation set approach")
+```
+
+-   The test error rate hovers around 2.7%.
+
+#### d.
+
+```{r}
+#  i.
+trainset = sample(dim(Default)[1], dim(Default)[1] / 2)
+
+# ii. 
+fit.trainset = glm(default ~ income + balance + student, data = Default, family = "binomial", subset = trainset)
+
+# iii. 
+glm.pred = rep("No", dim(Default)[1]/2)
+
+glm.probs = predict(fit.trainset, Default[-trainset, ], type = "response")
+
+glm.pred[glm.probs > 0.5] = "Yes"
+
+# iv. 
+et = mean(glm.pred != Default[-trainset, "default"])
+cat("The test error rate:", et*100, "% from validation set approach")
+```
+
+-   Adding the "student" dummy variable does not lead to a reduction in the validation set estimate of the test error rate.
+
+### Exercise 6:
+
+#### a.
+
+```{r}
+set.seed(1)
+fit.glm = glm(default ~ income + balance, data = Default, family = "binomial")
+summary(fit.glm)
+```
+
+-   The standard error for income: $4.99*10^{-6}$\
+-   The standard error for balance: $2.27*10^{-4}$
+
+#### b.
+
+```{r}
+boot.fn = function(data, index) {
+    fit = glm(default ~ income + balance, data = data, family = "binomial", subset = index)
+    return (coef(fit))
+}
+```
+
+#### c.
+
+```{r}
+library(boot)
+boot(Default, boot.fn, 1000)
+```
+
+-   The standard error:\
+    $\beta_0 = 0.449$// $\beta_1 = 4.99*10^{-6}$// $\beta_2 = 2.35*10^{-4}$
+
+#### d.
+
+-   The estimated standard errors are almost exactly the same as the calculated standard errors. This shows the practical uses of the bootstrap.
+
+### Exercise 7:
+
+```{r}
+summary(Weekly)
+```
+
+```{r}
+set.seed(1)
+attach(Weekly)
+```
+
+#### a.
+
+```{r}
+Weekly.fit = glm(Direction ~ Lag1 + Lag2, data = Weekly, family = binomial)
+summary(Weekly.fit)
+```
+
+#### b.
+
+```{r}
+butthefirstobservation.fit = glm(Direction ~ Lag1 + Lag2, data = Weekly[-1, ], family = binomial)
+summary(butthefirstobservation.fit)
+```
+
+#### c.
+
+```{r}
+predict(butthefirstobservation.fit, newdata = Weekly[1,], type = "response") > 0.5
+```
+
+```{r}
+Weekly$Direction[1]
+```
+
+-   Prediction was UP, true Direction was DOWN.
+
+#### d.
+
+```{r}
+count = rep(0, dim(Weekly)[1])
+for (i in 1:(dim(Weekly)[1])) {
+    glm.fit = glm(Direction ~ Lag1 + Lag2, data = Weekly[-i, ], family = binomial)
+    is_up = predict.glm(glm.fit, Weekly[i, ], type = "response") > 0.5
+    is_true_up = Weekly[i, ]$Direction == "Up"
+    if (is_up != is_true_up) 
+        count[i] = 1
+}
+sum(count)
+```
+
+-   490 errors.
+
+#### e.
+
+```{r}
+mean(count)
+```
+
+-   LOOCV estimates a test error rate of 45%.

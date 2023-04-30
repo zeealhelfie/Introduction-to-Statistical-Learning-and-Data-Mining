@@ -1,0 +1,176 @@
+---
+title: "Math448 HW#6"
+author: "Zahraa Alshalal"
+date: "2023-04-25"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Conceptual Questions:
+
+### Exercise 1:
+
+-   
+
+    a.  Th best subset selection is the model with k predictors that has the smallest training RSS because it has the the highest correlation with the response variable. This approach can be computationally intensive for large values of p.\
+
+-   
+
+    b.  Difficult to answer: The model with k predictors that has the smallest test RSS depends on the particular data set and cannot be determined without actually fitting and testing the models.\
+
+-   c: i. True. ii. True. iii. False. iv. False. v. False.
+
+### Exercise 2:
+
+-   
+
+    a.  Answer iii): The lasso adds a penalty term to the least squares objective function. This penalty term restricts the flexibility of the model. As a result, the lasso may have higher bias but lower variance than least squares.
+
+-   
+
+    b.  Answer iii): Similar to the lasso, ridge regression introduces bias by shrinking the coefficients towards zero. However, unlike the lasso, ridge regression does not set coefficients to zero, but rather shrinks them towards zero. This results in a reduction of model complexity, making it less flexible than least squares.
+
+-   
+
+    c.  Answer ii): Non-linear methods are able to capture more complex relationships in the data, resulting in lower bias and improved prediction accuracy.
+
+## Applied Questions:
+
+### Exercise 9:
+
+```{r}
+library(glmnet)
+require(ISLR)
+require(caret)
+require(tidyverse)
+```
+
+```{r}
+library(ISLR)
+sum(is.na(College))
+```
+
+-   
+
+    a.  
+
+```{r}
+set.seed(123)
+# normalize
+train.size = dim(College)[1] / 2
+train = sample(1:dim(College)[1], train.size)
+test = (-train)
+College.train = College[train, ]
+College.test = College[test, ]
+```
+
+-   
+
+    b.  
+
+```{r}
+# Run the linear model 
+lm.fit = lm(Apps~., data=College.train)
+lm.pred = predict(lm.fit, College.test, type="response")
+linear.MSE = mean((College.test[, "Apps"] - lm.pred)^2) 
+cat("The test error obtained from the linear model using least squares on the training set:", linear.MSE, "\n")
+(lin_info <- postResample(lm.pred, College.test$Apps))
+```
+
+-   
+
+    c.  
+
+```{r}
+train.mat = model.matrix(Apps~., data=College.train)
+test.mat = model.matrix(Apps~., data=College.test)
+grid = 10 ^ seq(4, -2, length=100)
+mod.ridge = cv.glmnet(train.mat, College.train[, "Apps"], alpha=0, lambda=grid, thresh=1e-12)
+lambda.best = mod.ridge$lambda.min
+ridge.pred = predict(mod.ridge, newx=test.mat, s=lambda.best)
+test_error2 = mean((College.test[, "Apps"] - ridge.pred)^2)
+cat("The test error obtained from the ridge regression model using least squares on the training set:", test_error2, "\n")
+(ridge_info <- postResample(ridge.pred, College.test$Apps))
+```
+
+-   Test RSS is slightly higher that OLS.\
+-   
+    d.  
+
+```{r}
+mod.lasso = cv.glmnet(train.mat, College.train[, "Apps"], alpha=1, lambda=grid, thresh=1e-12)
+lambda.best = mod.lasso$lambda.min
+lasso.pred = predict(mod.lasso, newx=test.mat, s=lambda.best)
+test_error3  = mean((College.test[, "Apps"] - lasso.pred)^2)
+cat("The test error obtained from the lasso model using least squares on the training set:", test_error3, "\n")
+(lasso_info <- postResample(lasso.pred, College.test$Apps))
+```
+
+-   Test RSS is slightly higher that OLS.
+
+```{r}
+# The coefficients 
+mod.lasso = glmnet(model.matrix(Apps~., data=College), College[, "Apps"], alpha=1)
+predict(mod.lasso, s=lambda.best, type="coefficients")
+```
+
+-   
+
+    e.  
+
+```{r}
+library(pls)
+pcr.fit = pcr(Apps~., data=College.train, scale=T, validation="CV")
+validationplot(pcr.fit, val.type="MSEP")
+```
+
+```{r}
+pcr.pred = predict(pcr.fit, College.test, ncomp=10)
+test_error4 = mean((College.test[, "Apps"] - pcr.pred)^2)
+cat("The test error obtained from the PCR model using least squares on the training set:", test_error3, "\n")
+(pcr_info <- postResample(pcr.pred, College.test$Apps))
+```
+
+```{r}
+pls.fit = plsr(Apps~., data=College.train, scale=T, validation="CV")
+validationplot(pls.fit, val.type="MSEP")
+```
+
+```{r}
+pls.pred = predict(pls.fit, College.test, ncomp=10)
+test_error5 = mean((College.test[, "Apps"] - pls.pred)^2)
+cat("The test error obtained from the PLS model using least squares on the training set:", test_error5, "\n")
+(pls_info <- postResample(pls.pred, College.test$Apps))
+```
+
+-   
+
+    g.  
+
+```{r}
+
+model_info <- as_data_frame(rbind(lin_info, ridge_info, lasso_info, pcr_info, pls_info))
+model_info <- mutate(model_info, model = c('Linear', 'Ridge', 'Lasso', 'PCR', 'PLS'))
+model_info_subset <- model_info[, c("model", "RMSE", "Rsquared")]
+model_info_subset <- subset(model_info, select = c("model", "RMSE", "Rsquared"))
+#resulting data frame
+print(model_info_subset)
+
+```
+
+```{r}
+test.avg = mean(College.test[, "Apps"])
+lm.test.r2 = 1 - mean((College.test[, "Apps"] - lm.pred)^2) /mean((College.test[, "Apps"] - test.avg)^2)
+ridge.test.r2 = 1 - mean((College.test[, "Apps"] - ridge.pred)^2) /mean((College.test[, "Apps"] - test.avg)^2)
+lasso.test.r2 = 1 - mean((College.test[, "Apps"] - lasso.pred)^2) /mean((College.test[, "Apps"] - test.avg)^2)
+pcr.test.r2 = 1 - mean((College.test[, "Apps"] - pcr.pred)^2) /mean((College.test[, "Apps"] - test.avg)^2)
+pls.test.r2 = 1 - mean((College.test[, "Apps"] - pls.pred)^2) /mean((College.test[, "Apps"] - test.avg)^2)
+barplot(c(lm.test.r2, ridge.test.r2, lasso.test.r2, pcr.test.r2, pls.test.r2), col="red", names.arg=c("OLS", "Ridge", "Lasso", "PCR", "PLS"), main="Test R-squared")
+```
+
+-   The plot shows that test $R^2$ for all models except PCR are around 0.9, with PLS having slightly higher test $R^2$ than others. PCR has a smaller test $R^2$ of around 0.8. All models except PCR predict college applications with high accuracy.
