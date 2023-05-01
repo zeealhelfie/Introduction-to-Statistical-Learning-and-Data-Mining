@@ -3,12 +3,12 @@ title: "Chapter 3 HW"
 author: "Zahraa Alshalal"
 date: "03/09/2023"
 output:
-  word_document: default
-  pdf_document: default
   html_document:
     fig_height: 4
     highlight: pygments
     theme: spacelab
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 # packages
 library(ISLR)
-tinytex::install_tinytex()
+tinytex::install_tinytex(force = TRUE)
 ```     
 
 * * *     

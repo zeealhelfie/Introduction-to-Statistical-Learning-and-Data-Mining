@@ -3,8 +3,8 @@ title: 'Math448: Chapter 4 HW'
 author: "Zahraa Alshalal"
 date: "2023-04-03"
 output:
-  word_document: default
   html_document: default
+  word_document: default
   pdf_document: default
 ---
 
